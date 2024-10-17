@@ -12,7 +12,7 @@ double Func::FuncA(int n) {
 
     }
 
-    return sum; // master test
+    return sum; // master test 
 
 }
 
