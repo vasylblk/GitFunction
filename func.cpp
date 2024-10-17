@@ -14,7 +14,11 @@ double Func::FuncA(int n) {
         sum += std::pow(1.0, i) / std::tgamma(i + 1); // Using gamma function for factorial
 >>>>>>> branchA
     }
+<<<<<<< HEAD
     return sum; //result
+=======
+    return sum; // return sum
+>>>>>>> branchA
 }
 
 
