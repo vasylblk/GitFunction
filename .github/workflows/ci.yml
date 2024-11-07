@@ -1,0 +1,23 @@
+name: C++ Build and Test
+
+on:
+  push:
+    branches:
+      - branchMake
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        user: actions/checkout@v2
+
+      - name: Install dependencies
+        run: sudo apt-get install g++ make
+
+      - name: Build the program
+        run: make
+
+      - name: Run the program
+        run: ./my_program
