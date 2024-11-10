@@ -1,11 +1,10 @@
-Source: gitfunction
+Sourse: func
+Maintainer: Vasyl <bulak.vasyl@lll.kpi>
 Section: utils
 Priority: optional
-Maintainer: Vasyl <bulak.vasyl@lll.kpi>
-Standards-Version: 4.5.0
-Build-Depends: dephelper (>= 9), g++ (>= 4:7.4), cmake, libgtest-dev
-
-Package: my_program
-Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
-Descriorion: A brief description of the package
+Standart-Version: 4.5.0
+Build-Depends: debhelper (>= 11)
+Package: func
+Architecture: arm64
+Depends: ${shlibs:Depends}, $(misc:Depends)
+Descriorion: Func software

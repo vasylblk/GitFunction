@@ -1,9 +1,10 @@
-name: C++ Build and Test
+name: Makefile CI
 
 on:
   push:
-    branches:
-      - branchMake
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
 
 jobs:
   build:
@@ -13,11 +14,20 @@ jobs:
       - name: Checkout code
         user: actions/checkout@v2
 
-      - name: Install dependencies
-        run: sudo apt-get install g++ make
+      - name: Configure toolchain
+        run: ./configure
 
-      - name: Build the program
+      - name: Build package
         run: make
 
-      - name: Run the program
-        run: ./my_program
+      - name: Run unit test
+        run: make check
+
+      - name: Install to deb folder
+        run: make deb
+
+      - name: Prepare DEB package
+        run: dpkg-deb --build deb func_1.0.deb
+
+      - name: Run distribution check
+        run: make distcheck

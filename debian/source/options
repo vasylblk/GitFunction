@@ -1,0 +1,2 @@
+extend-diff-ignore = "(^|/)(my_program-1\.0\.tar\.gz|autom4te\.cache)"
+extend-diff-ignore="^(Makefile|Makefile\.am|Makefile\.in|test_func\.cpp|.github/workflows/ci\.yml)"

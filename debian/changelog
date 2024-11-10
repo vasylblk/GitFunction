@@ -1,0 +1,5 @@
+gitfunction (1.0-1) UNRELEASED; urgency=medium
+
+  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+
+ -- vasyl <vasyl@unknown>  Thu, 07 Nov 2024 21:32:18 +0200

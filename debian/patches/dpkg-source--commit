@@ -1,0 +1,220 @@
+Description: <short summary of the patch>
+ TODO: Put a short summary on the line above and replace this paragraph
+ with a longer explanation of this change. Complete the meta-information
+ with other relevant fields (see below for details). To make it easier, the
+ information below has been extracted from the changelog. Adjust it or drop
+ it.
+ .
+ gitfunction (1.0-1) UNRELEASED; urgency=medium
+ .
+   * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+Author: vasyl <vasyl@unknown>
+
+---
+The information above should follow the Patch Tagging Guidelines, please
+checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
+are templates for supplementary fields that you might want to add:
+
+Origin: <vendor|upstream|other>, <url of original patch>
+Bug: <url in upstream bugtracker>
+Bug-Debian: https://bugs.debian.org/<bugnumber>
+Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
+Forwarded: <no|not-needed|url proving that it has been forwarded>
+Reviewed-By: <name and email of someone who approved the patch>
+Last-Update: 2024-11-07
+
+--- gitfunction-1.0.orig/.github/workflows/ci.yml
++++ gitfunction-1.0/.github/workflows/ci.yml
+@@ -4,6 +4,9 @@ on:
+   push:
+     branches:
+       - branchMake
++  pull_request:
++    branches:
++      - branchMake
+ 
+ jobs:
+   build:
+@@ -24,3 +27,6 @@ jobs:
+ 
+       - name: Generate tarball
+         run: autoreconf --install && ./configure && make dist
++
++      - name: Run unit tests
++        run: make check
+--- gitfunction-1.0.orig/Makefile.am
++++ gitfunction-1.0/Makefile.am
+@@ -1,4 +1,6 @@
+ AUTOMAKE_OPTIONS = foreign
+ bin_PROGRAMS = my_program
+-my_program_SOURCES = func.cpp 
++my_program_SOURCES = func.cpp main.cpp
+ DEB_DESTDIR = $(CURDIR)/debian/my_program
++check_PROGRAMS = test_func
++test_func_SOURCES = func.cpp test_func.cpp
+--- gitfunction-1.0.orig/Makefile.in
++++ gitfunction-1.0/Makefile.in
+@@ -87,6 +87,7 @@ NORMAL_UNINSTALL = :
+ PRE_UNINSTALL = :
+ POST_UNINSTALL = :
+ bin_PROGRAMS = my_program$(EXEEXT)
++check_PROGRAMS = test_func$(EXEEXT)
+ subdir = .
+ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
+ am__aclocal_m4_deps = $(top_srcdir)/configure.ac
+@@ -101,9 +102,12 @@ CONFIG_CLEAN_FILES =
+ CONFIG_CLEAN_VPATH_FILES =
+ am__installdirs = "$(DESTDIR)$(bindir)"
+ PROGRAMS = $(bin_PROGRAMS)
+-am_my_program_OBJECTS = func.$(OBJEXT)
++am_my_program_OBJECTS = func.$(OBJEXT) main.$(OBJEXT)
+ my_program_OBJECTS = $(am_my_program_OBJECTS)
+ my_program_LDADD = $(LDADD)
++am_test_func_OBJECTS = func.$(OBJEXT) test_func.$(OBJEXT)
++test_func_OBJECTS = $(am_test_func_OBJECTS)
++test_func_LDADD = $(LDADD)
+ AM_V_P = $(am__v_P_@AM_V@)
+ am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
+ am__v_P_0 = false
+@@ -119,7 +123,8 @@ am__v_at_1 =
+ DEFAULT_INCLUDES = -I.@am__isrc@
+ depcomp = $(SHELL) $(top_srcdir)/depcomp
+ am__maybe_remake_depfiles = depfiles
+-am__depfiles_remade = ./$(DEPDIR)/func.Po
++am__depfiles_remade = ./$(DEPDIR)/func.Po ./$(DEPDIR)/main.Po \
++	./$(DEPDIR)/test_func.Po
+ am__mv = mv -f
+ CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+ 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+@@ -134,8 +139,8 @@ AM_V_CXXLD = $(am__v_CXXLD_@AM_V@)
+ am__v_CXXLD_ = $(am__v_CXXLD_@AM_DEFAULT_V@)
+ am__v_CXXLD_0 = @echo "  CXXLD   " $@;
+ am__v_CXXLD_1 = 
+-SOURCES = $(my_program_SOURCES)
+-DIST_SOURCES = $(my_program_SOURCES)
++SOURCES = $(my_program_SOURCES) $(test_func_SOURCES)
++DIST_SOURCES = $(my_program_SOURCES) $(test_func_SOURCES)
+ am__can_run_installinfo = \
+   case $$AM_UPDATE_INFO_DIR in \
+     n|no|NO) false;; \
+@@ -273,8 +278,9 @@ top_build_prefix = @top_build_prefix@
+ top_builddir = @top_builddir@
+ top_srcdir = @top_srcdir@
+ AUTOMAKE_OPTIONS = foreign
+-my_program_SOURCES = func.cpp 
++my_program_SOURCES = func.cpp main.cpp
+ DEB_DESTDIR = $(CURDIR)/debian/my_program
++test_func_SOURCES = func.cpp test_func.cpp
+ all: all-am
+ 
+ .SUFFIXES:
+@@ -355,10 +361,17 @@ uninstall-binPROGRAMS:
+ clean-binPROGRAMS:
+ 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
+ 
++clean-checkPROGRAMS:
++	-test -z "$(check_PROGRAMS)" || rm -f $(check_PROGRAMS)
++
+ my_program$(EXEEXT): $(my_program_OBJECTS) $(my_program_DEPENDENCIES) $(EXTRA_my_program_DEPENDENCIES) 
+ 	@rm -f my_program$(EXEEXT)
+ 	$(AM_V_CXXLD)$(CXXLINK) $(my_program_OBJECTS) $(my_program_LDADD) $(LIBS)
+ 
++test_func$(EXEEXT): $(test_func_OBJECTS) $(test_func_DEPENDENCIES) $(EXTRA_test_func_DEPENDENCIES) 
++	@rm -f test_func$(EXEEXT)
++	$(AM_V_CXXLD)$(CXXLINK) $(test_func_OBJECTS) $(test_func_LDADD) $(LIBS)
++
+ mostlyclean-compile:
+ 	-rm -f *.$(OBJEXT)
+ 
+@@ -366,6 +379,8 @@ distclean-compile:
+ 	-rm -f *.tab.c
+ 
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/func.Po@am__quote@ # am--include-marker
++@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@ # am--include-marker
++@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_func.Po@am__quote@ # am--include-marker
+ 
+ $(am__depfiles_remade):
+ 	@$(MKDIR_P) $(@D)
+@@ -618,6 +633,7 @@ distcleancheck: distclean
+ 	       $(distcleancheck_listfiles) ; \
+ 	       exit 1; } >&2
+ check-am: all-am
++	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
+ check: check-am
+ all-am: Makefile $(PROGRAMS)
+ installdirs:
+@@ -656,11 +672,14 @@ maintainer-clean-generic:
+ 	@echo "it deletes files that may require special tools to rebuild."
+ clean: clean-am
+ 
+-clean-am: clean-binPROGRAMS clean-generic mostlyclean-am
++clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
++	mostlyclean-am
+ 
+ distclean: distclean-am
+ 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
+ 		-rm -f ./$(DEPDIR)/func.Po
++	-rm -f ./$(DEPDIR)/main.Po
++	-rm -f ./$(DEPDIR)/test_func.Po
+ 	-rm -f Makefile
+ distclean-am: clean-am distclean-compile distclean-generic \
+ 	distclean-tags
+@@ -709,6 +728,8 @@ maintainer-clean: maintainer-clean-am
+ 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
+ 	-rm -rf $(top_srcdir)/autom4te.cache
+ 		-rm -f ./$(DEPDIR)/func.Po
++	-rm -f ./$(DEPDIR)/main.Po
++	-rm -f ./$(DEPDIR)/test_func.Po
+ 	-rm -f Makefile
+ maintainer-clean-am: distclean-am maintainer-clean-generic
+ 
+@@ -726,21 +747,21 @@ ps-am:
+ 
+ uninstall-am: uninstall-binPROGRAMS
+ 
+-.MAKE: install-am install-strip
++.MAKE: check-am install-am install-strip
+ 
+ .PHONY: CTAGS GTAGS TAGS all all-am am--depfiles am--refresh check \
+-	check-am clean clean-binPROGRAMS clean-cscope clean-generic \
+-	cscope cscopelist-am ctags ctags-am dist dist-all dist-bzip2 \
+-	dist-gzip dist-lzip dist-shar dist-tarZ dist-xz dist-zip \
+-	dist-zstd distcheck distclean distclean-compile \
+-	distclean-generic distclean-tags distcleancheck distdir \
+-	distuninstallcheck dvi dvi-am html html-am info info-am \
+-	install install-am install-binPROGRAMS install-data \
+-	install-data-am install-dvi install-dvi-am install-exec \
+-	install-exec-am install-html install-html-am install-info \
+-	install-info-am install-man install-pdf install-pdf-am \
+-	install-ps install-ps-am install-strip installcheck \
+-	installcheck-am installdirs maintainer-clean \
++	check-am clean clean-binPROGRAMS clean-checkPROGRAMS \
++	clean-cscope clean-generic cscope cscopelist-am ctags ctags-am \
++	dist dist-all dist-bzip2 dist-gzip dist-lzip dist-shar \
++	dist-tarZ dist-xz dist-zip dist-zstd distcheck distclean \
++	distclean-compile distclean-generic distclean-tags \
++	distcleancheck distdir distuninstallcheck dvi dvi-am html \
++	html-am info info-am install install-am install-binPROGRAMS \
++	install-data install-data-am install-dvi install-dvi-am \
++	install-exec install-exec-am install-html install-html-am \
++	install-info install-info-am install-man install-pdf \
++	install-pdf-am install-ps install-ps-am install-strip \
++	installcheck installcheck-am installdirs maintainer-clean \
+ 	maintainer-clean-generic mostlyclean mostlyclean-compile \
+ 	mostlyclean-generic pdf pdf-am ps ps-am tags tags-am uninstall \
+ 	uninstall-am uninstall-binPROGRAMS
+--- /dev/null
++++ gitfunction-1.0/test_func.cpp
+@@ -0,0 +1,12 @@
++#include <gtest/gtest.h>
++#include "func.h"
++
++TEST(FuncTest, TestFuncA) {
++    Func f;
++    EXPECT_NEAR(f.FuncA(5), 2.70833, 0.0001);
++}
++
++int main(int argc, char **argv) {
++    ::testing::InitGoogleTest(&argc, argv);
++    return RUN_ALL_TESTS();
++}
