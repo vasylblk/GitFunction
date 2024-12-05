@@ -1,6 +1,15 @@
-FROM python:3.10-slim
+FROM gcc:11 AS build
 
 WORKDIR /app
-COPY server.py /app/server.py
 
-CMD ["python3", "server.py"]
+RUN git clone https://github.com/vasylblk/GitFunction.git .
+RUN make
+
+FROM alpine:3.18
+
+WORKDIR /app
+
+COPY --from=build /app/http-server /app/
+
+CMD ["/app/http-server"]
+
