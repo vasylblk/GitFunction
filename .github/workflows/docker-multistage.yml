@@ -15,7 +15,7 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
         with:
-          paltform: amd64, arm64
+          paltform: all
 
       - name: Set up docker buildx
         user: docker/setup-buildx-action@v2
@@ -27,10 +27,11 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and push docker images
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v4
         with:
+          context:
+          platforms: linux/amd64, linux/arm64
           push: true
           tags: |
-            vasylbulak/httpserver:latest
-            vasylbulak/httpserver:${{ github.sha }}
-          platforms: linux/amd64, linux/arm64
+            vasylbulak/http-server:latest
+            vasylbulak/http-server:${{ github.sha }}
