@@ -49,4 +49,26 @@ while true; do
         docker run -d --name srv2 --cpuset-cpus=1 vasylbulak/http-server:latest
         docker run -d --name srv3 --cpuset-cpus=2 vasylbulak/http-server:latest
     fi
+
+# Function to stop and remove container if it exists
+remove_container_if_exists() {
+    if [ "$(docker ps -aq -f name=$1)" ]; then
+        echo "Stopping and removing $1..."
+        docker stop $1
+        docker rm $1
+    fi
+}
+
+remove_container_if_exists srv1
+docker run --name srv1 --cpuset-cpus="0" -d vasylbulak/http-server:latest
+echo "srv1 launched on CPU core #0"
+
+remove_container_if_exists srv2
+docker run --name srv2 --cpuset-cpus="1" -d vasylbulak/http-server:latest
+echo "srv2 launched on CPU core #1"
+
+remove_container_if_exists srv3
+docker run --name srv3 --cpuset-cpus="2" -d vasylbulak/http-server:latest
+echo "srv3 launched on CPU core #2"
+
 done
